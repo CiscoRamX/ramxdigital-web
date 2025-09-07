@@ -20,6 +20,6 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Si tu build genera "dist", deja esta línea.
 # Si usas CRA (que genera "build"), cambia a: /app/build
 # Si usas Next export (que genera "out"), cambia a: /app/out
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 80
