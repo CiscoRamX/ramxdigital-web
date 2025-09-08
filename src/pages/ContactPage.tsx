@@ -5,7 +5,6 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { SectionTitle } from '../components/SectionTitle';
 import { Chip } from '../components/Chip';
 import { CTAButton } from '../components/CTAButton';
 import { submitContact } from '../lib/contact';
@@ -14,12 +13,26 @@ interface ContactPageProps {
   onNavigate: (page: string) => void;
 }
 
-// (Reservado si luego añadimos reCAPTCHA)
-declare global {
-  interface Window { grecaptcha: any; }
-}
+// reCAPTCHA
+declare global { interface Window { grecaptcha: any; } }
 
 const CALENDLY_URL = import.meta.env.VITE_CALENDLY_URL as string;
+const RECAPTCHA_SITE_KEY: string | undefined =
+  (import.meta.env as any).VITE_RECAPTCHA_SITEKEY || "6LdDf8ErAAAAAEum8aX8W_3fP9L8Lw15jLCfXNwf";
+
+// Carga el script de reCAPTCHA v3 si hace falta
+async function loadRecaptcha() {
+  if (!RECAPTCHA_SITE_KEY) return;
+  if (window.grecaptcha) return;
+  await new Promise<void>((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('reCAPTCHA failed to load'));
+    document.head.appendChild(s);
+  });
+}
 
 export function ContactPage({ onNavigate }: ContactPageProps) {
   const [formData, setFormData] = useState({
@@ -30,7 +43,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
     message: ''
   });
 
-  const [hp, setHp] = useState(''); // Honeypot
+  const [hp, setHp] = useState(''); // honeypot
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,14 +54,21 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return; // evita doble envío
+    if (loading) return;
     setError(null);
 
     try {
       setLoading(true);
-      await submitContact({ ...formData, hp });
+
+      // Token de reCAPTCHA v3 (si hay clave configurada)
+      let captcha_token: string | undefined;
+      if (RECAPTCHA_SITE_KEY) {
+        await loadRecaptcha();
+        captcha_token = await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'contact' });
+      }
+
+      await submitContact({ ...formData, hp, captcha_token });
       setIsSubmitted(true);
-      // opcional: redirigir al thank-you
       setTimeout(() => onNavigate('thank-you'), 1200);
     } catch (err: any) {
       setError(err?.message || 'Something went wrong.');
@@ -56,12 +76,6 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
       setLoading(false);
     }
   };
-
-  const plainEnglishPromises = [
-    'No technical jargon in our conversations',
-    'Clear project timelines and milestones',
-    'Honest advice about what you actually need'
-  ];
 
   const trustChips = [
     'Devon-based',
@@ -108,7 +122,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               No sales pressure, just clear advice on how we can help your business grow.
             </p>
             <div className="flex flex-wrap gap-3 mb-12">
-              {trustChips.map((chip, i) => <Chip key={i}>{chip}</Chip>)}
+              {trustChips.map((chip, index) => <Chip key={index}>{chip}</Chip>)}
             </div>
           </div>
         </div>
@@ -119,12 +133,9 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
-              <div
-                className="p-8 rounded-lg border"
-                style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--muted)' }}
-              >
+              <div className="p-8 rounded-lg border" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--muted)' }}>
                 <form onSubmit={handleSubmit} className="space-y-6" aria-busy={loading}>
-                  {/* Honeypot (oculto) */}
+                  {/* Honeypot oculto */}
                   <input
                     type="text"
                     name="company"
@@ -218,14 +229,9 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
                     />
                   </div>
 
-                  {error && (
-                    <p className="text-red-400 text-sm" role="alert">
-                      {error}
-                    </p>
-                  )}
+                  {error && <p className="text-red-400 text-sm" role="alert">{error}</p>}
 
                   <div className="flex flex-col sm:flex-row gap-4">
-                    {/* Botón principal: submit (evita doble onClick) */}
                     <CTAButton
                       variant="primary"
                       size="large"
@@ -249,17 +255,15 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               </div>
             </div>
 
-            {/* Sidebar (tu contenido existente si lo usas) */}
-            <div className="space-y-8">
-              {/* ... keep your current sidebar ... */}
-            </div>
+            {/* Sidebar (si lo usas) */}
+            <div className="space-y-8">{/* ... */}</div>
           </div>
         </div>
       </section>
 
-      {/* “What Happens Next” (opcional) */}
+      {/* Sección extra si la tienes */}
       <section className="py-20" style={{ backgroundColor: 'var(--surface)' }}>
-        {/* ... keep your current section ... */}
+        {/* ... */}
       </section>
     </div>
   );
