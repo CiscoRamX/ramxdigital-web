@@ -18,7 +18,7 @@ declare global { interface Window { grecaptcha: any; } }
 
 const CALENDLY_URL = import.meta.env.VITE_CALENDLY_URL as string;
 const RECAPTCHA_SITE_KEY: string | undefined =
-  (import.meta.env as any).VITE_RECAPTCHA_SITEKEY || "6LdDf8ErAAAAAEum8aX8W_3fP9L8Lw15jLCfXNwf";
+  (import.meta.env as any).//VITE_RECAPTCHA_SITEKEY || "6LdDf8ErAAAAAEum8aX8W_3fP9L8Lw15jLCfXNwf";//
 
 // Carga el script de reCAPTCHA v3 si hace falta
 async function loadRecaptcha() {
