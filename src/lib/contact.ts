@@ -10,7 +10,7 @@ interface ContactFormData {
 }
 
 // Configuración del webhook de n8n
-const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://your-n8n-instance.com/webhook/contact-form';
+const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n-n8n.bsdhjo.easypanel.host/webhook/contact-form';
 
 export async function submitContact(data: ContactFormData): Promise<void> {
   try {
