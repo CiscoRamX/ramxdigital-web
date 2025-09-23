@@ -92,47 +92,70 @@ function validateFormData(data) {
 
 // Send notification email to team
 async function sendTeamNotification(formData) {
-  const emailContent = `
-🚀 NEW QUALIFIED LEAD RECEIVED!
+  // Format project types array if it exists
+  const projectTypesFormatted = Array.isArray(formData.projectTypes)
+    ? formData.projectTypes.join(', ')
+    : (formData.projectTypes || 'Not specified');
 
-👤 CLIENT DETAILS:
+  // Calculate lead score based on budget and project complexity
+  const getLeadScore = () => {
+    if (formData.budget?.includes('10k+') || formData.budget?.includes('15k+')) return '🔥 HIGH VALUE';
+    if (formData.budget?.includes('5k-10k') || formData.budget?.includes('3k-5k')) return '⭐ QUALIFIED';
+    return '💡 POTENTIAL';
+  };
+
+  const emailContent = `
+🚀 ${getLeadScore()} LEAD RECEIVED!
+
+👤 CLIENT INFORMATION:
 • Name: ${formData.name}
 • Email: ${formData.email}
 • Phone: ${formData.phone || 'Not provided'}
-• Company: ${formData.business || formData.company || 'Not specified'}
+• Business: ${formData.business || 'Not specified'}
 • Industry: ${formData.industry || 'Not specified'}
-• Current Website: ${formData.currentWebsite || 'None'}
+• Current Website: ${formData.currentWebsite || 'None mentioned'}
 
-💼 PROJECT INFORMATION:
-• Project Types: ${formData.projectTypes || 'Not specified'}
-• Budget: ${formData.budget || 'Not specified'}
+💼 PROJECT SCOPE:
+• Services Needed: ${projectTypesFormatted}
+• Budget Range: ${formData.budget || 'Not specified'}
 • Timeline: ${formData.timeline || 'Not specified'}
-• Care Plan Interest: ${formData.carePlan || 'Not specified'}
+• Care Plan Interest: ${formData.carePlan || 'Not mentioned'}
 
-🎯 PROJECT DETAILS:
-• Description: ${formData.message}
+🎯 PROJECT VISION:
 • Main Goals: ${formData.goals || 'Not specified'}
 • Target Audience: ${formData.targetAudience || 'Not specified'}
 • Design Inspiration: ${formData.designInspiration || 'None provided'}
-• Special Requirements: ${formData.specialRequirements || 'None'}
+• Special Requirements: ${formData.specialRequirements || 'None mentioned'}
 
-📊 SUBMISSION INFO:
+💬 PROJECT DESCRIPTION:
+${formData.message}
+
+📊 SUBMISSION DETAILS:
 • Received: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}
-• Source: ${formData.source || 'website'}
-• IP: ${formData.ip || 'Unknown'}
+• Source: Website Contact Wizard
+• IP Address: ${formData.ip || 'Unknown'}
+• Lead Quality: ${getLeadScore()}
 
 ---
-💼 RamXDigital - Lead Management System
-🌐 ramxdigital.com
+💼 RamXDigital - Advanced Lead Management System
+🌐 ramxdigital.com | 📧 Response required within 4 hours
   `;
 
   const budgetLabel = formData.budget ? ` - ${formData.budget}` : '';
-  const companyLabel = formData.business || formData.company || '';
+  const companyLabel = formData.business || '';
+  const servicesLabel = Array.isArray(formData.projectTypes)
+    ? formData.projectTypes.slice(0, 2).join(', ')
+    : (formData.projectTypes || 'Web Project');
+
+  // Enhanced subject line with lead quality
+  const leadQuality = formData.budget?.includes('10k+') || formData.budget?.includes('15k+')
+    ? '🔥 HIGH VALUE'
+    : '⭐ QUALIFIED';
 
   return transporter.sendMail({
     from: `"RamXDigital Lead System" <${SMTP_USER}>`,
     to: NOTIFICATION_EMAIL,
-    subject: `🚀 QUALIFIED LEAD: ${formData.name} (${companyLabel})${budgetLabel}`,
+    subject: `${leadQuality} LEAD: ${formData.name} ${companyLabel ? `(${companyLabel})` : ''} - ${servicesLabel}${budgetLabel}`,
     text: emailContent,
     replyTo: formData.email
   });
