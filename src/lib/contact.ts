@@ -20,9 +20,6 @@ export async function submitContact(data: ContactFormData): Promise<void> {
       timestamp: new Date().toISOString()
     };
 
-    // Debug: mostrar datos enviados
-    console.log('Datos enviados a n8n:', payload);
-
     const response = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: {
@@ -31,15 +28,10 @@ export async function submitContact(data: ContactFormData): Promise<void> {
       body: JSON.stringify(payload)
     });
 
-    // Debug: mostrar respuesta completa
-    console.log('Respuesta de n8n:', response.status, response.statusText);
-
     let result;
     try {
       result = await response.json();
-      console.log('JSON de respuesta:', result);
     } catch (e) {
-      console.log('Error parseando JSON:', e);
       result = { success: response.ok };
     }
 
