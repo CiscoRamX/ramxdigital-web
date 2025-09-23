@@ -33,7 +33,7 @@ const SMTP_PASS = process.env.SMTP_PASS;
 const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || 'cisco@ramxdigital.com';
 
 // Email transporter setup
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
   port: SMTP_PORT,
   secure: false, // true for 465, false for other ports
