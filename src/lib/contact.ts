@@ -2,9 +2,20 @@
 interface ContactFormData {
   name: string;
   email: string;
-  business: string;
+  phone?: string;
+  business?: string;
+  company?: string;
+  industry?: string;
+  currentWebsite?: string;
+  projectTypes?: string;
   budget: string;
+  timeline?: string;
+  carePlan?: string;
   message: string;
+  goals?: string;
+  targetAudience?: string;
+  designInspiration?: string;
+  specialRequirements?: string;
   hp?: string; // honeypot
   captcha_token?: string; // opcional para reCAPTCHA
 }

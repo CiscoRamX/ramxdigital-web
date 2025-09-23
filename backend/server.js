@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
@@ -82,7 +83,7 @@ function validateFormData(data) {
   }
 
   // Honeypot check
-  if (data.hp || data.company) {
+  if (data.hp) {
     errors.push('Suspicious activity detected');
   }
 
@@ -92,16 +93,28 @@ function validateFormData(data) {
 // Send notification email to team
 async function sendTeamNotification(formData) {
   const emailContent = `
-New contact form submission received!
+🚀 NEW QUALIFIED LEAD RECEIVED!
 
 👤 CLIENT DETAILS:
 • Name: ${formData.name}
 • Email: ${formData.email}
-• Business: ${formData.business || 'Not specified'}
-• Budget: ${formData.budget || 'Not specified'}
+• Phone: ${formData.phone || 'Not provided'}
+• Company: ${formData.business || formData.company || 'Not specified'}
+• Industry: ${formData.industry || 'Not specified'}
+• Current Website: ${formData.currentWebsite || 'None'}
 
-💬 MESSAGE:
-${formData.message}
+💼 PROJECT INFORMATION:
+• Project Types: ${formData.projectTypes || 'Not specified'}
+• Budget: ${formData.budget || 'Not specified'}
+• Timeline: ${formData.timeline || 'Not specified'}
+• Care Plan Interest: ${formData.carePlan || 'Not specified'}
+
+🎯 PROJECT DETAILS:
+• Description: ${formData.message}
+• Main Goals: ${formData.goals || 'Not specified'}
+• Target Audience: ${formData.targetAudience || 'Not specified'}
+• Design Inspiration: ${formData.designInspiration || 'None provided'}
+• Special Requirements: ${formData.specialRequirements || 'None'}
 
 📊 SUBMISSION INFO:
 • Received: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}
@@ -109,14 +122,17 @@ ${formData.message}
 • IP: ${formData.ip || 'Unknown'}
 
 ---
-💼 RamXDigital - Contact System
+💼 RamXDigital - Lead Management System
 🌐 ramxdigital.com
   `;
 
+  const budgetLabel = formData.budget ? ` - ${formData.budget}` : '';
+  const companyLabel = formData.business || formData.company || '';
+
   return transporter.sendMail({
-    from: `"RamXDigital Contact" <${SMTP_USER}>`,
+    from: `"RamXDigital Lead System" <${SMTP_USER}>`,
     to: NOTIFICATION_EMAIL,
-    subject: `🔔 New enquiry from ${formData.name}`,
+    subject: `🚀 QUALIFIED LEAD: ${formData.name} (${companyLabel})${budgetLabel}`,
     text: emailContent,
     replyTo: formData.email
   });
@@ -124,35 +140,70 @@ ${formData.message}
 
 // Send auto-response to client
 async function sendAutoResponse(formData) {
+  // Personalise based on project types
+  const projectTypes = formData.projectTypes || '';
+  const isMaintenanceInterested = projectTypes.includes('maintenance');
+  const isSEOInterested = projectTypes.includes('seo');
+  const isNewWebsite = projectTypes.includes('new-website') || projectTypes.includes('redesign');
+
+  let personalizedContent = '';
+  if (isNewWebsite) {
+    personalizedContent = `
+
+🌟 EXCITING PROJECT AHEAD!
+I can see you're looking at ${projectTypes.includes('new-website') ? 'a new website' : 'a website redesign'}. Based on your budget range (${formData.budget}), I've got some brilliant ideas that could work perfectly for your ${formData.industry || 'business'}.`;
+  }
+
+  if (isMaintenanceInterested) {
+    personalizedContent += `
+
+🛡️ SMART THINKING ON MAINTENANCE!
+You've shown interest in our Care Plans - that's forward-thinking! Proper website maintenance is crucial for ${formData.industry || 'any business'}, and our Care ${formData.carePlan || 'plans'} could be perfect for keeping your site secure and optimised.`;
+  }
+
+  if (isSEOInterested) {
+    personalizedContent += `
+
+📈 SEO & PERFORMANCE FOCUS!
+Great to see you're thinking about SEO! We're actually developing an advanced SEO monitoring platform that will give you detailed insights into your website's performance. This could be a game-changer for your ${formData.industry || 'business'}.`;
+  }
+
   const emailContent = `
 Hello ${formData.name},
 
-Thank you for getting in touch with RamXDigital! 🚀
+Thank you for taking the time to complete our detailed project questionnaire! 🚀
 
-We've received your enquiry and will respond within 4 hours during UK business hours.
+I've just reviewed your submission for ${formData.business || formData.company || 'your project'}, and I'm excited about the possibilities.${personalizedContent}
 
-📝 YOUR ENQUIRY:
-"${formData.message}"
+📋 WHAT HAPPENS NEXT:
+1. I'll personally review your project requirements (${formData.timeline})
+2. Prepare a tailored proposal based on your goals
+3. Send you a comprehensive quote within 4 hours (UK business hours)
+4. Schedule a strategy call to discuss your vision in detail
 
-⚡ NEXT STEPS:
-1. We'll review your request in detail
-2. Send you an initial proposal
-3. Schedule a call if needed
+💡 YOUR PROJECT SUMMARY:
+• Project Type: ${projectTypes}
+• Budget Range: ${formData.budget}
+• Timeline: ${formData.timeline}
+• Main Goals: ${formData.goals || 'To be discussed'}
 
-🚀 In a hurry?
-You can book a 30-minute call directly:
+🚀 Can't wait for our response?
+Book a 30-minute strategy call directly:
 https://calendly.com/cisco-ramxdigital/30min
 
-Kind regards,
+Looking forward to helping transform your digital presence!
+
+Best regards,
 Cisco Ramos
-Founder, RamXDigital
+Founder & Lead Developer
+RamXDigital
 
 ---
-💼 RamXDigital - Web Design & Development
-🌐 ramxdigital.com
-📧 cisco@ramxdigital.com
+💼 RamXDigital - Bespoke Web Solutions
+🌐 ramxdigital.com | 📧 cisco@ramxdigital.com
+🔜 SEO Platform: seo.ramxdigital.com (launching soon!)
 
-This is an automated message. For urgent enquiries, please reply to this email.
+This is an automated response, but I personally read and respond to every enquiry.
   `;
 
   return transporter.sendMail({
