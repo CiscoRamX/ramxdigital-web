@@ -1,0 +1,195 @@
+{
+  "name": "RamXDigital Contact Form - FIXED",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "contact-form-fixed",
+        "options": {},
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-fixed",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "contact-form-fixed-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.name && $json.name.trim().length > 0 }}",
+              "operation": "equal",
+              "value2": "true"
+            },
+            {
+              "value1": "={{ $json.email && $json.email.includes('@') }}",
+              "operation": "equal",
+              "value2": "true"
+            },
+            {
+              "value1": "={{ $json.message && $json.message.trim().length > 0 }}",
+              "operation": "equal",
+              "value2": "true"
+            },
+            {
+              "value1": "={{ $json.hp || '' }}",
+              "operation": "equal",
+              "value2": ""
+            }
+          ]
+        }
+      },
+      "id": "validation-simple",
+      "name": "Validation Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@ramxdigital.com",
+        "toEmail": "hola@ramxdigital.com",
+        "subject": "🔔 New enquiry from {{ $json.name }}",
+        "text": "New contact form submission received!\n\n👤 CLIENT DETAILS:\n• Name: {{ $json.name }}\n• Email: {{ $json.email }}\n• Business: {{ $json.business || 'Not specified' }}\n• Budget: {{ $json.budget || 'Not specified' }}\n\n💬 MESSAGE:\n{{ $json.message }}\n\n📊 SUBMISSION INFO:\n• Received: {{ $now.format('dd/MM/yyyy HH:mm:ss') }}\n• Source: {{ $json.source || 'website' }}\n\n---\n💼 RamXDigital - Contact System\n🌐 ramxdigital.com",
+        "options": {}
+      },
+      "id": "team-email",
+      "name": "Team Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "fromEmail": "hola@ramxdigital.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "✅ We've received your message - RamXDigital",
+        "text": "Hello {{ $json.name }},\n\nThank you for getting in touch with RamXDigital! 🚀\n\nWe've received your enquiry and will respond within 4 hours during UK business hours.\n\n📝 YOUR ENQUIRY:\n\"{{ $json.message }}\"\n\n⚡ NEXT STEPS:\n1. We'll review your request in detail\n2. Send you an initial proposal\n3. Schedule a call if needed\n\n🚀 In a hurry?\nYou can book a 30-minute call directly:\nhttps://calendly.com/cisco-ramxdigital/30min\n\nKind regards,\nCisco Ramos\nFounder, RamXDigital\n\n---\n💼 RamXDigital - Web Design & Development\n🌐 ramxdigital.com\n📧 hola@ramxdigital.com\n\nThis is an automated message. For urgent enquiries, please reply to this email.",
+        "options": {}
+      },
+      "id": "client-email",
+      "name": "Auto-Responder",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [680, 380]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "merge-results",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 1,
+      "position": [900, 290]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Message sent successfully. We'll be in touch soon.\"\n}",
+        "options": {}
+      },
+      "id": "success-webhook-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 290]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": false,\n  \"message\": \"Invalid data or suspicious request.\",\n  \"error\": \"VALIDATION_FAILED\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "error-webhook-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validation Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation Check": {
+      "main": [
+        [
+          {
+            "node": "Team Notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Auto-Responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Team Notification": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Responder": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2024-01-15T17:00:00.000Z",
+  "updatedAt": "2024-01-15T17:00:00.000Z",
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "hash": "fixed-webhook-config",
+  "id": "4"
+}

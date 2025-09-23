@@ -1,0 +1,307 @@
+{
+  "name": "RamXDigital Contact Form - Improved",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "contact-form",
+        "options": {
+          "enableCors": true,
+          "corsAllowOrigin": "*"
+        }
+      },
+      "id": "webhook-contact",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "contact-form-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "validate-data",
+              "name": "is_valid",
+              "value": "={{ \n  $json.name && $json.name.trim().length > 0 &&\n  $json.email && $json.email.includes('@') &&\n  $json.message && $json.message.trim().length > 0 &&\n  (!$json.hp || $json.hp === '') &&\n  (!$json.company || $json.company === '')\n}}",
+              "type": "boolean"
+            },
+            {
+              "id": "clean-name",
+              "name": "clean_name",
+              "value": "={{ $json.name ? $json.name.trim() : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "clean-email",
+              "name": "clean_email",
+              "value": "={{ $json.email ? $json.email.trim().toLowerCase() : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "clean-business",
+              "name": "clean_business",
+              "value": "={{ $json.business ? $json.business.trim() : 'Not specified' }}",
+              "type": "string"
+            },
+            {
+              "id": "clean-budget",
+              "name": "clean_budget",
+              "value": "={{ $json.budget ? $json.budget : 'Not specified' }}",
+              "type": "string"
+            },
+            {
+              "id": "clean-message",
+              "name": "clean_message",
+              "value": "={{ $json.message ? $json.message.trim() : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "timestamp",
+              "name": "received_at",
+              "value": "={{ $now.format('dd/MM/yyyy HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "name": "form_source",
+              "value": "{{ $json.source || 'website' }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "validate-and-clean",
+      "name": "Validate & Clean Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-valid-check",
+              "leftValue": "={{ $json.is_valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "validation-check",
+      "name": "Validation Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@ramxdigital.com",
+        "toEmail": "hola@ramxdigital.com",
+        "subject": "🔔 New enquiry from {{ $json.clean_name }}",
+        "text": "New contact form submission received!\n\n👤 CLIENT DETAILS:\n• Name: {{ $json.clean_name }}\n• Email: {{ $json.clean_email }}\n• Business: {{ $json.clean_business }}\n• Budget: {{ $json.clean_budget }}\n\n💬 MESSAGE:\n{{ $json.clean_message }}\n\n📊 SUBMISSION INFO:\n• Received: {{ $json.received_at }}\n• Source: {{ $json.form_source }}\n\n---\n💼 RamXDigital - Contact System\n🌐 ramxdigital.com",
+        "options": {
+          "ccEmail": "",
+          "bccEmail": "",
+          "replyTo": "{{ $json.clean_email }}"
+        }
+      },
+      "id": "send-team-notification",
+      "name": "Team Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "fromEmail": "hola@ramxdigital.com",
+        "toEmail": "={{ $json.clean_email }}",
+        "subject": "✅ We've received your message - RamXDigital",
+        "text": "Hello {{ $json.clean_name }},\n\nThank you for getting in touch with RamXDigital! 🚀\n\nWe've received your enquiry and will respond within 4 hours during UK business hours.\n\n📝 YOUR ENQUIRY:\n\"{{ $json.clean_message }}\"\n\n⚡ NEXT STEPS:\n1. We'll review your request in detail\n2. Send you an initial proposal\n3. Schedule a call if needed\n\n🚀 In a hurry?\nYou can book a 30-minute call directly:\nhttps://calendly.com/cisco-ramxdigital/30min\n\nKind regards,\nCisco Ramos\nFounder, RamXDigital\n\n---\n💼 RamXDigital - Web Design & Development\n🌐 ramxdigital.com\n📧 hola@ramxdigital.com\n\nThis is an automated message. For urgent enquiries, please reply to this email.",
+        "options": {
+          "ccEmail": "",
+          "bccEmail": "",
+          "replyTo": "hola@ramxdigital.com"
+        }
+      },
+      "id": "send-auto-responder",
+      "name": "Auto-Responder",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [900, 380]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "merge-emails",
+      "name": "Merge Email Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1120, 290]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Message sent successfully. We'll be in touch soon.\",\n  \"data\": {\n    \"name\": \"{{ $json.clean_name }}\",\n    \"email\": \"{{ $json.clean_email }}\",\n    \"received_at\": \"{{ $json.received_at }}\"\n  }\n}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 290]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"message\": \"Invalid data or suspicious request.\",\n  \"error\": \"VALIDATION_FAILED\",\n  \"timestamp\": \"{{ $now.format('dd/MM/yyyy HH:mm:ss') }}\"\n}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "reject-response",
+      "name": "Reject Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate & Clean Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Clean Data": {
+      "main": [
+        [
+          {
+            "node": "Validation Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation Check": {
+      "main": [
+        [
+          {
+            "node": "Team Notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Auto-Responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reject Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Team Notification": {
+      "main": [
+        [
+          {
+            "node": "Merge Email Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Responder": {
+      "main": [
+        [
+          {
+            "node": "Merge Email Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Email Results": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2024-01-15T16:00:00.000Z",
+  "updatedAt": "2024-01-15T16:00:00.000Z",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-15T16:00:00.000Z",
+      "updatedAt": "2024-01-15T16:00:00.000Z",
+      "id": "contact-form-improved",
+      "name": "Contact Forms Improved"
+    }
+  ],
+  "triggerCount": 1,
+  "hash": "improved-contact-form-v2",
+  "id": "3"
+}

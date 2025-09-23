@@ -9,8 +9,8 @@ interface ContactFormData {
   captcha_token?: string; // opcional para reCAPTCHA
 }
 
-// Configuración del webhook de n8n
-const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n-n8n.bsdhjo.easypanel.host/webhook/contact-form';
+// Configuración de la API de contacto
+const CONTACT_API_URL = import.meta.env.VITE_CONTACT_API_URL || 'https://api.ramxdigital.com/api/contact';
 
 export async function submitContact(data: ContactFormData): Promise<void> {
   try {
@@ -20,7 +20,7 @@ export async function submitContact(data: ContactFormData): Promise<void> {
       timestamp: new Date().toISOString()
     };
 
-    const response = await fetch(N8N_WEBHOOK_URL, {
+    const response = await fetch(CONTACT_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,10 +39,7 @@ export async function submitContact(data: ContactFormData): Promise<void> {
       throw new Error(result.message || `HTTP ${response.status}: ${response.statusText}`);
     }
 
-    // Si n8n responde con "Workflow was started", considerarlo éxito
-    if (result.message === 'Workflow was started') {
-      return { success: true, message: 'Message sent successfully' };
-    }
+    // La API ya responde con el formato correcto
 
     return result;
   } catch (error) {
