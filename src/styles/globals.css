@@ -1,0 +1,340 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Lexend:wght@400;500&display=swap');
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  
+  /* Color Mode Variables - Core (Default) */
+  --color-bg: #0F1115;
+  --color-surface: #111318;
+  --color-muted: #1A1D24;
+  --color-text: #F5F7FB;
+  --color-subtle: #C7CFDC;
+  --color-border: #262A35;
+  
+  /* Brand Green (Always Consistent) */
+  --accent: #2ECE72;
+  --accent-hover: #22B265;
+  --accent-pressed: #1A8E52;
+  --ring: rgba(46,206,114,.35);
+  
+  /* Mode-Specific Accents - Core */
+  --accent-2: #22D3EE;
+  --accent-3: #8B5CF6;
+  --accent-4: #F59E0B;
+  --grad-glow: linear-gradient(135deg, #2ECE72 0%, #22D3EE 60%, #8B5CF6 100%);
+  
+  /* CTA Text */
+  --cta-text: #0F1115;
+  
+  /* Estados */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  
+  /* Radius Tokens */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+  
+  /* Spacing Tokens */
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  
+  /* Typography Tokens */
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Lexend', sans-serif;
+  
+  /* Desktop Typography */
+  --text-display: 64px;
+  --text-display-lh: 72px;
+  --text-h1: 56px;
+  --text-h1-lh: 64px;
+  --text-h2: 32px;
+  --text-h2-lh: 40px;
+  --text-h3: 24px;
+  --text-h3-lh: 32px;
+  --text-body: 16px;
+  --text-body-lh: 28px;
+  --text-small: 14px;
+  --text-small-lh: 24px;
+  --text-overline: 12px;
+  --text-overline-lh: 16px;
+  
+  /* Motion Tokens */
+  --dur-1: 160ms;
+  --dur-2: 260ms;
+  --dur-3: 380ms;
+  --ease: cubic-bezier(.21,.8,.35,1);
+
+  /* System Colors - mapped to Color Mode Tokens */
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-text);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-text);
+  --primary: var(--accent);
+  --primary-foreground: var(--cta-text);
+  --secondary: var(--color-muted);
+  --secondary-foreground: var(--color-text);
+  --muted: var(--color-muted);
+  --muted-foreground: var(--color-subtle);
+  --accent: var(--accent);
+  --accent-foreground: var(--cta-text);
+  --destructive: var(--danger);
+  --destructive-foreground: var(--color-text);
+  --border: var(--color-border);
+  --input: var(--color-surface);
+  --input-background: var(--color-surface);
+  --switch-background: var(--color-muted);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: var(--ring);
+  --chart-1: var(--accent);
+  --chart-2: var(--accent-2);
+  --chart-3: var(--accent-3);
+  --chart-4: var(--accent-4);
+  --chart-5: var(--success);
+  --radius: var(--r-sm);
+  --sidebar: var(--color-surface);
+  --sidebar-foreground: var(--color-text);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--cta-text);
+  --sidebar-accent: var(--color-muted);
+  --sidebar-accent-foreground: var(--color-text);
+  --sidebar-border: var(--color-border);
+  --sidebar-ring: var(--ring);
+}
+
+/* Pantone–Cool Glow Mode */
+:root[data-color-mode="cool-glow"] {
+  --color-bg: #0A0E1A;
+  --color-surface: #0F1420;
+  --color-muted: #152030;
+  --color-text: #E1F0FF;
+  --color-subtle: #9BB8E8;
+  --color-border: #1E3A5F;
+  
+  --accent-2: #00D4FF;
+  --accent-3: #4F46E5;
+  --accent-4: #06B6D4;
+  --grad-glow: linear-gradient(135deg, #2ECE72 0%, #00D4FF 40%, #4F46E5 100%);
+  
+  --cta-text: #0A0E1A;
+}
+
+/* Pantone–Warm Pulse Mode */
+:root[data-color-mode="warm-pulse"] {
+  --color-bg: #1C0A0A;
+  --color-surface: #2A1010;
+  --color-muted: #3D1A1A;
+  --color-text: #FFEBE1;
+  --color-subtle: #E8B8A0;
+  --color-border: #5F2E1E;
+  
+  --accent-2: #FF6B35;
+  --accent-3: #DC2626;
+  --accent-4: #F59E0B;
+  --grad-glow: linear-gradient(135deg, #2ECE72 0%, #FF6B35 40%, #DC2626 100%);
+  
+  --cta-text: #1C0A0A;
+}
+
+/* Pantone–Soft Neutrals Mode */
+:root[data-color-mode="soft-neutrals"] {
+  --color-bg: #0C0C0E;
+  --color-surface: #15151A;
+  --color-muted: #1F1F28;
+  --color-text: #F0F0F5;
+  --color-subtle: #A8A8B8;
+  --color-border: #2A2A35;
+  
+  --accent-2: #6366F1;
+  --accent-3: #8B5CF6;
+  --accent-4: #EC4899;
+  --grad-glow: linear-gradient(135deg, #2ECE72 0%, #6366F1 40%, #8B5CF6 100%);
+  
+  --cta-text: #0C0C0E;
+}
+
+/* Tablet Typography */
+@media (max-width: 768px) {
+  :root {
+    --text-h1: 44px;
+    --text-h1-lh: 56px;
+    --text-h2: 28px;
+    --text-h2-lh: 36px;
+    --text-h3: 22px;
+    --text-h3-lh: 30px;
+  }
+}
+
+/* Mobile Typography */
+@media (max-width: 375px) {
+  :root {
+    --text-display: 40px;
+    --text-display-lh: 48px;
+    --text-h1: 34px;
+    --text-h1-lh: 44px;
+    --text-h2: 24px;
+    --text-h2-lh: 32px;
+    --text-h3: 20px;
+    --text-h3-lh: 28px;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/**
+ * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
+ */
+@layer base {
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+    h1 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h1);
+      font-weight: 700;
+      line-height: var(--text-h1-lh);
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h2);
+      font-weight: 700;
+      line-height: var(--text-h2-lh);
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h3);
+      font-weight: 700;
+      line-height: var(--text-h3-lh);
+    }
+
+    h4 {
+      font-family: var(--font-heading);
+      font-size: var(--text-body);
+      font-weight: 700;
+      line-height: var(--text-body-lh);
+    }
+
+    p {
+      font-family: var(--font-body);
+      font-size: var(--text-body);
+      font-weight: var(--font-weight-normal);
+      line-height: var(--text-body-lh);
+    }
+
+    label {
+      font-family: var(--font-body);
+      font-size: var(--text-body);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--text-body-lh);
+    }
+
+    button {
+      font-family: var(--font-body);
+      font-size: var(--text-body);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--text-body-lh);
+    }
+
+    input {
+      font-family: var(--font-body);
+      font-size: var(--text-body);
+      font-weight: var(--font-weight-normal);
+      line-height: var(--text-body-lh);
+    }
+
+    small {
+      font-family: var(--font-body);
+      font-size: var(--text-small);
+      font-weight: var(--font-weight-normal);
+      line-height: var(--text-small-lh);
+    }
+
+    .overline {
+      font-family: var(--font-body);
+      font-size: var(--text-overline);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--text-overline-lh);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .display {
+      font-family: var(--font-heading);
+      font-size: var(--text-display);
+      font-weight: 700;
+      line-height: var(--text-display-lh);
+    }
+  }
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
